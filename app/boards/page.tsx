@@ -1,4 +1,5 @@
 import { and, desc, eq, gt, not } from 'drizzle-orm';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/server';
 import { db } from '@/lib/db';
@@ -54,7 +55,12 @@ export default async function BoardsPage() {
 type BoardCard = { id: string; name: string; updatedAt?: Date | null; invitedAt?: Date | null };
 
 function BoardGroup({ title, count, boards: boardList, empty, invited = false }: { title: string; count: number; boards: BoardCard[]; empty: string; invited?: boolean }) {
-	return <section className="board-group"><div className="group-heading"><div><p className="eyebrow">{invited ? 'Waiting for you' : 'Workspace'}</p><h2>{title}<span>{count}</span></h2></div>{count > 0 && <span className="group-rule" />}</div>{boardList.length > 0 ? <div className="board-grid">{boardList.map((board) => <article className="board-card" key={board.id}><div className="board-card-icon" aria-hidden="true">▦</div><div className="board-card-copy"><h3>{board.name}</h3><p>{invited ? 'Invitation pending' : board.updatedAt ? `Updated ${formatDate(board.updatedAt)}` : 'Ready to get moving'}</p></div><span className="board-card-arrow" aria-hidden="true">↗</span></article>)}</div> : <div className="empty-group"><span className="empty-mark" aria-hidden="true">＋</span><p>{empty}</p></div>}</section>;
+	return <section className="board-group"><div className="group-heading"><div><p className="eyebrow">{invited ? 'Waiting for you' : 'Workspace'}</p><h2>{title}<span>{count}</span></h2></div>{count > 0 && <span className="group-rule" />}</div>{boardList.length > 0 ? <div className="board-grid">{boardList.map((board) => <BoardCard key={board.id} board={board} invited={invited} />)}</div> : <div className="empty-group"><span className="empty-mark" aria-hidden="true">＋</span><p>{empty}</p></div>}</section>;
+}
+
+function BoardCard({ board, invited }: { board: BoardCard; invited: boolean }) {
+	const content = <><div className="board-card-icon" aria-hidden="true">▦</div><div className="board-card-copy"><h3>{board.name}</h3><p>{invited ? 'Invitation pending' : board.updatedAt ? `Updated ${formatDate(board.updatedAt)}` : 'Ready to get moving'}</p></div><span className="board-card-arrow" aria-hidden="true">↗</span></>;
+	return invited ? <article className="board-card">{content}</article> : <Link className="board-card" href={`/boards/${board.id}`}>{content}</Link>;
 }
 
 function formatDate(date: Date) {

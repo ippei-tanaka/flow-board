@@ -350,6 +350,21 @@ h1 {
   gap: 10px;
 }
 
+.empty-list {
+  display: grid;
+  min-height: 74px;
+  place-items: center;
+  border: 1px dashed #d4ded6;
+  border-radius: 7px;
+  color: #9aa99f;
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.empty-list p {
+  margin: 0;
+  font-size: 11px;
+}
+
 .task-card {
   border: 1px solid #e4e9e4;
   border-radius: 8px;
