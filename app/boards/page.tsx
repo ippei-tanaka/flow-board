@@ -1,9 +1,9 @@
 import { and, desc, eq, gt, not } from 'drizzle-orm';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/server';
 import { db } from '@/lib/db';
 import { boardInvitations, boardMembers, boards } from '@/src/db/schema';
+import WorkspaceHeader from '../components/workspace-header';
 import CreateBoardForm from './create-board-form';
 
 export const dynamic = 'force-dynamic';
@@ -33,24 +33,9 @@ export default async function BoardsPage() {
 			.orderBy(desc(boardInvitations.createdAt)),
 	]);
 
-	const initials = session.user.name
-		.split(' ')
-		.map((part) => part[0])
-		.join('')
-		.slice(0, 2)
-		.toUpperCase();
-
 	return (
 		<main className="boards-shell">
-			<header className="topbar">
-				<Link className="brand-mark" href="/boards"><span className="brand-dot" /><span>Flow Board</span></Link>
-				<nav className="workspace-nav" aria-label="Workspace navigation">
-					<Link className="nav-item nav-item-active" href="/boards">Boards</Link>
-					<span className="nav-item nav-item-disabled">Calendar</span>
-					<span className="nav-item nav-item-disabled">Insights</span>
-				</nav>
-				<div className="topbar-actions"><span className="avatar" aria-label={`${session.user.name}'s profile`}>{initials}</span><form action={async () => { 'use server'; await auth.signOut(); redirect('/sign-in'); }}><button className="logout-button" type="submit"><span aria-hidden="true">↪</span> Log out</button></form></div>
-			</header>
+			<WorkspaceHeader activePage="/boards" />
 
 			<section className="boards-intro">
 				<div><p className="eyebrow">Your workspace</p><h1>Boards</h1><p className="boards-description">Keep every project close, whether you are leading it, helping out, or waiting to join.</p></div>

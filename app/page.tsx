@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/server';
-
+import WorkspaceHeader from '@/app/components/workspace-header';
 export default function Page() {
   async function logout() {
     'use server';
@@ -11,27 +11,8 @@ export default function Page() {
 
   return (
     <main className="workspace-shell">
-      <header className="topbar">
-        <div className="brand-mark">
-          <span className="brand-dot" />
-          <span>Flow Board</span>
-        </div>
-        <nav className="workspace-nav" aria-label="Workspace navigation">
-          <button className="nav-item nav-item-active" type="button">Boards</button>
-          <button className="nav-item" type="button">Calendar</button>
-          <button className="nav-item" type="button">Insights</button>
-        </nav>
-        <div className="topbar-actions">
-          <button className="icon-button" type="button" aria-label="Search boards" title="Search boards">⌕</button>
-          <span className="avatar" aria-label="Your profile">AK</span>
-          <form action={logout}>
-            <button className="logout-button" type="submit">
-              <span aria-hidden="true">↪</span>
-              Log out
-            </button>
-          </form>
-        </div>
-      </header>
+
+      <WorkspaceHeader activePage="/" />
 
       <section className="board-header">
         <div>
