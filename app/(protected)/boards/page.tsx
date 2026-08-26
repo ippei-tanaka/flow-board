@@ -1,33 +1,30 @@
 import { and, desc, eq, gt, not } from 'drizzle-orm';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/server';
 import { db } from '@/lib/db';
 import { boardInvitations, boardMembers, boards } from '@/src/db/schema';
-import WorkspaceHeader from '../components/workspace-header';
+import WorkspaceHeader from '@/app/components/workspace-header';
 import CreateBoardForm from './create-board-form';
 
 export const dynamic = 'force-dynamic';
 
 export default async function BoardsPage() {
 	const { data: session } = await auth.getSession();
-	if (!session?.user) {
-		redirect('/sign-in');
-	}
+	const user = session!.user;
 
 	const now = new Date();
 	const [ownedBoards, joinedBoards, invitedBoards] = await Promise.all([
-		db.select().from(boards).where(eq(boards.ownerId, session.user.id)).orderBy(desc(boards.updatedAt)),
+		db.select().from(boards).where(eq(boards.ownerId, user.id)).orderBy(desc(boards.updatedAt)),
 		db.select({ id: boards.id, name: boards.name, updatedAt: boards.updatedAt })
 			.from(boardMembers)
 			.innerJoin(boards, eq(boardMembers.boardId, boards.id))
-			.where(and(eq(boardMembers.userId, session.user.id), not(eq(boards.ownerId, session.user.id))))
+			.where(and(eq(boardMembers.userId, user.id), not(eq(boards.ownerId, user.id))))
 			.orderBy(desc(boards.updatedAt)),
 		db.select({ id: boards.id, name: boards.name, invitedAt: boardInvitations.createdAt })
 			.from(boardInvitations)
 			.innerJoin(boards, eq(boardInvitations.boardId, boards.id))
 			.where(and(
-				eq(boardInvitations.email, session.user.email),
+				eq(boardInvitations.email, user.email),
 				eq(boardInvitations.status, 'pending'),
 				gt(boardInvitations.expiresAt, now),
 			))

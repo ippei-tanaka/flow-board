@@ -1,9 +1,8 @@
 import { and, eq } from 'drizzle-orm';
-import { notFound, redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/server';
 import { db } from '@/lib/db';
 import { boardMembers, boards } from '@/src/db/schema';
-import WorkspaceHeader from '../../components/workspace-header';
+import WorkspaceHeader from '@/app/components/workspace-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,11 +13,10 @@ const columns = [
 	{ title: 'Done', color: 'green' },
 ] as const;
 
-export default async function BoardPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function BoardPage({ params }: { params: Promise<{ id: string }> }) 
+{
 	const { data: session } = await auth.getSession();
-	if (!session?.user) {
-		redirect('/sign-in');
-	}
+	const user = session!.user;
 	const { id } = await params;
 
 	let board;
@@ -31,7 +29,7 @@ export default async function BoardPage({ params }: { params: Promise<{ id: stri
 			})
 			.from(boardMembers)
 			.innerJoin(boards, eq(boardMembers.boardId, boards.id))
-			.where(and(eq(boardMembers.boardId, id), eq(boardMembers.userId, session.user.id)))
+			.where(and(eq(boardMembers.boardId, id), eq(boardMembers.userId, user.id)))
 			.limit(1);
 	} catch (error) {
 		console.error('Failed to load board', { boardId: id, error });
