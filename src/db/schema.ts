@@ -6,6 +6,7 @@ import {
 	unique,
 	uuid,
 	text,
+	integer,
 } from "drizzle-orm/pg-core";
 
 export const boardRole = pgEnum("board_role", ["admin", "member"]);
@@ -28,6 +29,41 @@ export const boards = pgTable("boards", {
 		.defaultNow(),
 }, (table) => [
 	index("boards_owner_id_idx").on(table.ownerId),
+]);
+
+export const cardLists = pgTable("card_lists", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	boardId: uuid("board_id")
+		.notNull()
+		.references(() => boards.id, { onDelete: "cascade" }),
+	name: text("name").notNull(),
+	position: integer("position").notNull().default(0),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+}, (table) => [
+	index("card_lists_board_position_idx").on(table.boardId, table.position),
+]);
+
+export const cards = pgTable("cards", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	listId: uuid("list_id")
+		.notNull()
+		.references(() => cardLists.id, { onDelete: "cascade" }),
+	title: text("title").notNull(),
+	description: text("description"),
+	position: integer("position").notNull().default(0),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+}, (table) => [
+	index("cards_list_position_idx").on(table.listId, table.position),
 ]);
 
 export const boardMembers = pgTable("board_members", {

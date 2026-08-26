@@ -1,7 +1,8 @@
-import { and, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import { auth } from '@/lib/auth/server';
 import { db } from '@/lib/db';
-import { boardMembers, boards } from '@/src/db/schema';
+import { boardMembers, boards, cardLists, cards as cardsTable } from '@/src/db/schema';
+import { createCard, createCardList } from '../actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +41,12 @@ export default async function BoardPage({ params }: { params: Promise<{ id: stri
 		// notFound();
 	// }
 
+	const [lists, boardCards] = await Promise.all([
+		db.select().from(cardLists).where(eq(cardLists.boardId, id)).orderBy(asc(cardLists.position)),
+		db.select().from(cardsTable).innerJoin(cardLists, eq(cardsTable.listId, cardLists.id))
+			.where(eq(cardLists.boardId, id)).orderBy(asc(cardsTable.position)),
+	]);
+
 	return (
 		<main className="workspace-shell">
 			<section className="board-header">
@@ -72,22 +79,31 @@ export default async function BoardPage({ params }: { params: Promise<{ id: stri
 			</section>
 
 			<section className="board" aria-label={`${board.name} board`}>
-				{columns.map((column) => <BoardColumn key={column.title} title={column.title} color={column.color} />)}
-				<button className="add-list-button" type="button"><span aria-hidden="true">＋</span> Add another list</button>
+				{lists.map((list, index) => <BoardColumn key={list.id} list={list} cards={boardCards.filter(({ cards }) => cards.listId === list.id)} color={columns[index % columns.length].color} />)}
+				<form action={createCardList} className="add-list-form">
+					<input type="hidden" name="boardId" value={id} />
+					<input name="name" placeholder="New list name" aria-label="New list name" required maxLength={80} />
+					<button className="add-list-button" type="submit"><span aria-hidden="true">＋</span> Add list</button>
+				</form>
 			</section>
 		</main>
 	);
 }
 
-function BoardColumn({ title, color }: { title: string; color: string }) {
+function BoardColumn({ list, cards: listCards, color }: { list: typeof cardLists.$inferSelect; cards: Array<{ cards: typeof cardsTable.$inferSelect }>; color: string }) {
 	return (
 		<section className="list-column">
 			<div className="list-heading">
-				<div className="list-title"><span className={`status-dot ${color}`} /><h2>{title}</h2><span className="card-count">0</span></div>
-				<button className="more-button" type="button" aria-label={`More options for ${title}`} title={`More options for ${title}`}>•••</button>
+				<div className="list-title"><span className={`status-dot ${color}`} /><h2>{list.name}</h2><span className="card-count">{listCards.length}</span></div>
+				<button className="more-button" type="button" aria-label={`More options for ${list.name}`} title={`More options for ${list.name}`}>•••</button>
 			</div>
-			<div className="empty-list"><p>No cards yet</p></div>
-			<button className="add-card-button" type="button"><span aria-hidden="true">＋</span> Add a card</button>
+			{listCards.length > 0 ? <div className="card-stack">{listCards.map(({ cards: card }) => <article className="task-card" key={card.id}><h3>{card.title}</h3>{card.description && <p>{card.description}</p>}</article>)}</div> : <div className="empty-list"><p>No cards yet</p></div>}
+			<form action={createCard} className="add-card-form">
+				<input type="hidden" name="listId" value={list.id} />
+				<input name="title" placeholder="Card title" aria-label={`New card in ${list.name}`} required maxLength={160} />
+				<input name="description" placeholder="Description (optional)" aria-label="Card description" maxLength={500} />
+				<button className="add-card-button" type="submit"><span aria-hidden="true">＋</span> Add a card</button>
+			</form>
 		</section>
 	);
 }

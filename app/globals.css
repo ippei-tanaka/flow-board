@@ -664,6 +664,44 @@ h1 {
   font-size: 11px;
 }
 
+.add-card-form {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.add-card-form input,
+.add-list-form input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #d4ded6;
+  border-radius: 5px;
+  padding: 8px 9px;
+  color: var(--deep-green);
+  background: rgba(255, 255, 255, 0.72);
+  font: inherit;
+  font-size: 11px;
+  outline: none;
+}
+
+.add-card-form input:focus,
+.add-list-form input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(239, 115, 95, 0.12);
+}
+
+.add-card-form .add-card-button {
+  margin-top: 0;
+}
+
+.add-list-form {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  width: 180px;
+  min-width: 180px;
+}
+
 .add-card-button:hover {
   color: var(--deep-green);
   background: #e9eeea;
