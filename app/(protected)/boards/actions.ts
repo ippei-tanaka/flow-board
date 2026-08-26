@@ -102,3 +102,22 @@ export async function createCard(formData: FormData) {
 	await db.insert(cards).values({ listId, title, description: description || null, position: (lastCard.position ?? -1) + 1 });
 	revalidatePath(`/boards/${list.boardId}`);
 }
+
+export async function deleteCard(formData: FormData) {
+	const { data: session } = await auth.getSession();
+	if (!session?.user) redirect('/sign-in');
+
+	const cardId = String(formData.get('cardId') ?? '');
+	if (!cardId) return;
+
+	const [card] = await db.select({ boardId: cardLists.boardId })
+		.from(cards)
+		.innerJoin(cardLists, eq(cards.listId, cardLists.id))
+		.innerJoin(boardMembers, eq(boardMembers.boardId, cardLists.boardId))
+		.where(and(eq(cards.id, cardId), eq(boardMembers.userId, session.user.id)))
+		.limit(1);
+	if (!card) return;
+
+	await db.delete(cards).where(eq(cards.id, cardId));
+	revalidatePath(`/boards/${card.boardId}`);
+}
