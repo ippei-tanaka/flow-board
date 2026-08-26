@@ -2,7 +2,6 @@ import { and, eq } from 'drizzle-orm';
 import { auth } from '@/lib/auth/server';
 import { db } from '@/lib/db';
 import { boardMembers, boards } from '@/src/db/schema';
-import WorkspaceHeader from '@/app/components/workspace-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,8 +42,6 @@ export default async function BoardPage({ params }: { params: Promise<{ id: stri
 
 	return (
 		<main className="workspace-shell">
-			<WorkspaceHeader activePage="/boards" />
-
 			<section className="board-header">
 				<div>
 					<p className="eyebrow">Workspace / Board</p>
@@ -98,7 +95,6 @@ function BoardColumn({ title, color }: { title: string; color: string }) {
 function BoardLoadError() {
 	return (
 		<main className="workspace-shell">
-			<WorkspaceHeader activePage="/boards" />
 			<section className="board-header">
 				<div>
 					<p className="eyebrow">Board unavailable</p>

@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { auth } from '@/lib/auth/server';
 import { db } from '@/lib/db';
 import { boardInvitations, boardMembers, boards } from '@/src/db/schema';
-import WorkspaceHeader from '@/app/components/workspace-header';
 import CreateBoardForm from './create-board-form';
 
 export const dynamic = 'force-dynamic';
@@ -33,8 +32,6 @@ export default async function BoardsPage() {
 
 	return (
 		<main className="boards-shell">
-			<WorkspaceHeader activePage="/boards" />
-
 			<section className="boards-intro">
 				<div><p className="eyebrow">Your workspace</p><h1>Boards</h1><p className="boards-description">Keep every project close, whether you are leading it, helping out, or waiting to join.</p></div>
 				<CreateBoardForm />

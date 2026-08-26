@@ -1,18 +1,6 @@
-import { redirect } from 'next/navigation';
-import { auth } from '@/lib/auth/server';
-import WorkspaceHeader from '@/app/components/workspace-header';
 export default function Page() {
-  async function logout() {
-    'use server';
-
-    await auth.signOut();
-    redirect('/sign-in');
-  }
-
   return (
     <main className="workspace-shell">
-
-      <WorkspaceHeader activePage="/" />
 
       <section className="board-header">
         <div>
