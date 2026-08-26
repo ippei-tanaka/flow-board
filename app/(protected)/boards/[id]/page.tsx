@@ -2,7 +2,8 @@ import { and, asc, eq } from 'drizzle-orm';
 import { auth } from '@/lib/auth/server';
 import { db } from '@/lib/db';
 import { boardMembers, boards, cardLists, cards as cardsTable } from '@/src/db/schema';
-import { createCard, createCardList, deleteCardList } from '../actions';
+import { createCard, createCardList } from '../actions';
+import { ListMenu } from './list-menu';
 
 export const dynamic = 'force-dynamic';
 
@@ -95,15 +96,7 @@ function BoardColumn({ list, cards: listCards, color }: { list: typeof cardLists
 		<section className="list-column">
 			<div className="list-heading">
 				<div className="list-title"><span className={`status-dot ${color}`} /><h2>{list.name}</h2><span className="card-count">{listCards.length}</span></div>
-				<details className="list-menu">
-					<summary className="more-button" aria-label={`More options for ${list.name}`} title={`More options for ${list.name}`}>•••</summary>
-					<div className="list-menu-content">
-						<form action={deleteCardList}>
-							<input type="hidden" name="listId" value={list.id} />
-							<button className="delete-list-button" type="submit">Delete list</button>
-						</form>
-					</div>
-				</details>
+				<ListMenu listId={list.id} listName={list.name} />
 			</div>
 			{listCards.length > 0 ? <div className="card-stack">{listCards.map(({ cards: card }) => <article className="task-card" key={card.id}><h3>{card.title}</h3>{card.description && <p>{card.description}</p>}</article>)}</div> : <div className="empty-list"><p>No cards yet</p></div>}
 			<form action={createCard} className="add-card-form">
