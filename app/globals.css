@@ -345,6 +345,48 @@ h1 {
   color: var(--deep-green);
 }
 
+.list-menu {
+  position: relative;
+}
+
+.list-menu summary {
+  list-style: none;
+}
+
+.list-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.list-menu-content {
+  position: absolute;
+  right: 0;
+  z-index: 1;
+  min-width: 120px;
+  margin-top: 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px;
+  background: var(--paper);
+  box-shadow: 0 8px 18px rgba(31, 55, 44, 0.12);
+}
+
+.delete-list-button {
+  width: 100%;
+  border: 0;
+  border-radius: 4px;
+  padding: 7px 9px;
+  color: #a24f46;
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.delete-list-button:hover {
+  background: #faece9;
+}
+
 .card-stack {
   display: grid;
   gap: 10px;

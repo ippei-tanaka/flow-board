@@ -63,6 +63,24 @@ export async function createCardList(formData: FormData) {
 	revalidatePath(`/boards/${boardId}`);
 }
 
+export async function deleteCardList(formData: FormData) {
+	const { data: session } = await auth.getSession();
+	if (!session?.user) redirect('/sign-in');
+
+	const listId = String(formData.get('listId') ?? '');
+	if (!listId) return;
+
+	const [list] = await db.select({ boardId: cardLists.boardId })
+		.from(cardLists)
+		.innerJoin(boardMembers, eq(boardMembers.boardId, cardLists.boardId))
+		.where(and(eq(cardLists.id, listId), eq(boardMembers.userId, session.user.id)))
+		.limit(1);
+	if (!list) return;
+
+	await db.delete(cardLists).where(eq(cardLists.id, listId));
+	revalidatePath(`/boards/${list.boardId}`);
+}
+
 export async function createCard(formData: FormData) {
 	const { data: session } = await auth.getSession();
 	if (!session?.user) redirect('/sign-in');
