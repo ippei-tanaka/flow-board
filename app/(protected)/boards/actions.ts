@@ -3,7 +3,7 @@
 import { auth } from '@/lib/auth/server';
 import { db } from '@/lib/db';
 import { boardMembers, boards, cardLists, cards } from '@/src/db/schema';
-import { and, eq, max } from 'drizzle-orm';
+import { and, eq, max, asc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -120,4 +120,74 @@ export async function deleteCard(formData: FormData) {
 
 	await db.delete(cards).where(eq(cards.id, cardId));
 	revalidatePath(`/boards/${card.boardId}`);
+}
+
+export async function moveCard(formData: FormData) {
+	const { data: session } = await auth.getSession();
+	if (!session?.user) redirect('/sign-in');
+
+	const boardId = String(formData.get('boardId') ?? '');
+	const cardId = String(formData.get('cardId') ?? '');
+	const sourceListId = String(formData.get('sourceListId') ?? '');
+	const targetListId = String(formData.get('targetListId') ?? '');
+	const targetIndex = Number(formData.get('targetIndex') ?? 0);
+
+	if (!boardId || !cardId || !sourceListId || !targetListId) return;
+
+	const [membership] = await db.select({ boardId: boardMembers.boardId })
+		.from(boardMembers)
+		.where(and(eq(boardMembers.boardId, boardId), eq(boardMembers.userId, session.user.id)))
+		.limit(1);
+	if (!membership) return;
+
+	const [cardRecord] = await db.select({
+		id: cards.id,
+		listId: cards.listId,
+		position: cards.position,
+	})
+		.from(cards)
+		.innerJoin(cardLists, eq(cards.listId, cardLists.id))
+		.where(and(eq(cards.id, cardId), eq(cardLists.boardId, boardId)))
+		.limit(1);
+	if (!cardRecord) return;
+
+	const sourceCards = await db.select()
+		.from(cards)
+		.where(eq(cards.listId, sourceListId))
+		.orderBy(asc(cards.position));
+
+	const sourceWithoutDragged = sourceCards.filter((card) => card.id !== cardId);
+
+	let nextSource = sourceWithoutDragged;
+	let nextTarget: typeof cards.$inferSelect[] = [];
+
+	if (sourceListId === targetListId) {
+		nextSource = [...sourceWithoutDragged];
+		nextSource.splice(Math.max(0, Math.min(targetIndex, nextSource.length)), 0, { ...cardRecord, listId: sourceListId } as typeof cards.$inferSelect);
+	} else {
+		nextTarget = await db.select()
+			.from(cards)
+			.where(eq(cards.listId, targetListId))
+			.orderBy(asc(cards.position));
+		nextTarget = nextTarget.filter((card) => card.id !== cardId);
+		nextTarget.splice(Math.max(0, Math.min(targetIndex, nextTarget.length)), 0, { ...cardRecord, listId: targetListId } as typeof cards.$inferSelect);
+	}
+
+	for (let index = 0; index < nextSource.length; index += 1) {
+		const card = nextSource[index];
+		await db.update(cards)
+			.set({ position: index, listId: sourceListId })
+			.where(eq(cards.id, card.id));
+	}
+
+	if (sourceListId !== targetListId) {
+		for (let index = 0; index < nextTarget.length; index += 1) {
+			const card = nextTarget[index];
+			await db.update(cards)
+				.set({ position: index, listId: targetListId })
+				.where(eq(cards.id, card.id));
+		}
+	}
+
+	revalidatePath(`/boards/${boardId}`);
 }

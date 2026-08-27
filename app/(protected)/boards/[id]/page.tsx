@@ -2,9 +2,8 @@ import { and, asc, eq } from 'drizzle-orm';
 import { auth } from '@/lib/auth/server';
 import { db } from '@/lib/db';
 import { boardMembers, boards, cardLists, cards as cardsTable } from '@/src/db/schema';
-import { createCard, createCardList } from '../actions';
-import { CardMenu } from './card-menu';
-import { ListMenu } from './list-menu';
+import { createCardList } from '../actions';
+import { BoardDnd } from './board-dnd';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,7 +75,20 @@ export default async function BoardPage({ params }: { params: Promise<{ id: stri
 			</section> */}
 
 			<section className="board" aria-label={`${board.name} board`}>
-				{lists.map((list, index) => <BoardColumn key={list.id} list={list} cards={boardCards.filter(({ cards }) => cards.listId === list.id)} color={columns[index % columns.length].color} />)}
+				<BoardDnd
+					boardId={id}
+					initialLists={lists.map((list, index) => ({
+						...list,
+						color: columns[index % columns.length].color,
+						cards: boardCards.filter(({ cards }) => cards.listId === list.id).map(({ cards }) => ({
+							id: cards.id,
+							title: cards.title,
+							description: cards.description,
+							listId: cards.listId,
+							position: cards.position,
+						})),
+					}))}
+				/>
 				<form action={createCardList} className="add-list-form">
 					<input type="hidden" name="boardId" value={id} />
 					<input name="name" placeholder="New list name" aria-label="New list name" required maxLength={80} />
@@ -84,35 +96,6 @@ export default async function BoardPage({ params }: { params: Promise<{ id: stri
 				</form>
 			</section>
 		</main>
-	);
-}
-
-function BoardColumn({ list, cards: listCards, color }: { list: typeof cardLists.$inferSelect; cards: Array<{ cards: typeof cardsTable.$inferSelect }>; color: string }) {
-	return (
-		<section className="list-column">
-			<div className="list-heading">
-				<div className="list-title"><span className={`status-dot ${color}`} /><h2>{list.name}</h2><span className="card-count">{listCards.length}</span></div>
-				<ListMenu listId={list.id} listName={list.name} />
-			</div>
-			{listCards.length > 0 ? 
-				<div className="card-stack">{listCards.map(({ cards: card }) => 
-					<article className="task-card" key={card.id}>
-						<div className="card-topline">
-							<h3>{card.title}</h3>
-							<CardMenu cardId={card.id} cardTitle={card.title} />
-						</div>
-						{card.description && <p>{card.description}</p>}
-					</article>)}
-				</div> 
-				: <div className="empty-list"><p>No cards yet</p></div>
-				}
-			<form action={createCard} className="add-card-form">
-				<input type="hidden" name="listId" value={list.id} />
-				<input name="title" placeholder="Card title" aria-label={`New card in ${list.name}`} required maxLength={160} />
-				<input name="description" placeholder="Description (optional)" aria-label="Card description" maxLength={500} />
-				<button className="add-card-button" type="submit"><span aria-hidden="true">＋</span> Add a card</button>
-			</form>
-		</section>
 	);
 }
 
