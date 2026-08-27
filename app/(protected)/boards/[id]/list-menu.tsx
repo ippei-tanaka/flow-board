@@ -1,19 +1,23 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { deleteCardList } from '../actions';
+import { useUiStore } from '@/lib/stores/ui-store';
 
 export function ListMenu({ listId, listName }: { listId: string; listName: string }) {
-	const [open, setOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
+	const menuId = `list:${listId}`;
+	const open = useUiStore((state) => state.openMenuId === menuId);
+	const toggleMenu = useUiStore((state) => state.toggleMenu);
+	const closeMenu = useUiStore((state) => state.closeMenu);
 
 	useEffect(() => {
 		function closeOnOutsideClick(event: PointerEvent) {
-			if (!menuRef.current?.contains(event.target as Node)) setOpen(false);
+			if (!menuRef.current?.contains(event.target as Node)) closeMenu();
 		}
 
 		function closeOnEscape(event: KeyboardEvent) {
-			if (event.key === 'Escape') setOpen(false);
+			if (event.key === 'Escape') closeMenu();
 		}
 
 		document.addEventListener('pointerdown', closeOnOutsideClick);
@@ -22,7 +26,7 @@ export function ListMenu({ listId, listName }: { listId: string; listName: strin
 			document.removeEventListener('pointerdown', closeOnOutsideClick);
 			document.removeEventListener('keydown', closeOnEscape);
 		};
-	}, []);
+	}, [closeMenu]);
 
 	return (
 		<div className="list-menu" ref={menuRef}>
@@ -33,7 +37,7 @@ export function ListMenu({ listId, listName }: { listId: string; listName: strin
 				aria-haspopup="menu"
 				aria-label={`More options for ${listName}`}
 				title={`More options for ${listName}`}
-				onClick={() => setOpen((isOpen) => !isOpen)}
+				onClick={() => toggleMenu(menuId)}
 			>
 				•••
 			</button>

@@ -1,19 +1,23 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { deleteCard } from '../actions';
+import { useUiStore } from '@/lib/stores/ui-store';
 
 export function CardMenu({ cardId, cardTitle }: { cardId: string; cardTitle: string }) {
-	const [open, setOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
+	const menuId = `card:${cardId}`;
+	const open = useUiStore((state) => state.openMenuId === menuId);
+	const toggleMenu = useUiStore((state) => state.toggleMenu);
+	const closeMenu = useUiStore((state) => state.closeMenu);
 
 	useEffect(() => {
 		function closeOnOutsideClick(event: PointerEvent) {
-			if (!menuRef.current?.contains(event.target as Node)) setOpen(false);
+			if (!menuRef.current?.contains(event.target as Node)) closeMenu();
 		}
 
 		function closeOnEscape(event: KeyboardEvent) {
-			if (event.key === 'Escape') setOpen(false);
+			if (event.key === 'Escape') closeMenu();
 		}
 
 		document.addEventListener('pointerdown', closeOnOutsideClick);
@@ -22,7 +26,7 @@ export function CardMenu({ cardId, cardTitle }: { cardId: string; cardTitle: str
 			document.removeEventListener('pointerdown', closeOnOutsideClick);
 			document.removeEventListener('keydown', closeOnEscape);
 		};
-	}, []);
+	}, [closeMenu]);
 
 	return (
 		<div className="card-menu-wrapper" ref={menuRef}>
@@ -33,7 +37,7 @@ export function CardMenu({ cardId, cardTitle }: { cardId: string; cardTitle: str
 				aria-haspopup="menu"
 				aria-label={`More options for ${cardTitle}`}
 				title={`More options for ${cardTitle}`}
-				onClick={() => setOpen((isOpen) => !isOpen)}
+				onClick={() => toggleMenu(menuId)}
 			>
 				•••
 			</button>

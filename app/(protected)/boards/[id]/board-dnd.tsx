@@ -1,69 +1,22 @@
 'use client';
 
-import { startTransition, useState } from 'react';
+import { startTransition } from 'react';
 import { createCard, moveCard } from '../actions';
+import { BoardProvider, useBoardStore, type ListWithCards } from '@/lib/stores/board-store';
 import { CardMenu } from './card-menu';
 import { ListMenu } from './list-menu';
 
-type Card = {
-	id: string;
-	title: string;
-	description: string | null;
-	listId: string;
-	position: number;
-};
-
-type ListWithCards = {
-	id: string;
-	name: string;
-	boardId: string;
-	position: number;
-	color: string;
-	cards: Card[];
-};
-
-type DragState = { cardId: string; sourceListId: string } | null;
-
 export function BoardDnd({ boardId, initialLists }: { boardId: string; initialLists: ListWithCards[] }) {
-	const [lists, setLists] = useState(initialLists);
-	const [dragState, setDragState] = useState<DragState>(null);
-	const [dragOverListId, setDragOverListId] = useState<string | null>(null);
+	return <BoardProvider initialLists={initialLists}><BoardDndContent boardId={boardId} /></BoardProvider>;
+}
 
-	const moveCardLocally = (sourceListId: string, cardId: string, targetListId: string, targetIndex: number) => {
-		setLists((currentLists) => {
-			const nextLists = currentLists.map((list) => ({
-				...list,
-				cards: list.cards.map((card) => ({ ...card })),
-			}));
-
-			const sourceList = nextLists.find((list) => list.id === sourceListId);
-			const targetList = nextLists.find((list) => list.id === targetListId);
-			if (!sourceList || !targetList) return currentLists;
-
-			const sourceIndex = sourceList.cards.findIndex((card) => card.id === cardId);
-			if (sourceIndex === -1) return currentLists;
-
-			const [movedCard] = sourceList.cards.splice(sourceIndex, 1);
-			if (!movedCard) return currentLists;
-
-			const normalizedTargetIndex =
-				sourceListId === targetListId && sourceIndex < targetIndex
-					? targetIndex - 1
-					: targetIndex;
-
-			movedCard.listId = targetListId;
-			targetList.cards.splice(Math.max(0, Math.min(normalizedTargetIndex, targetList.cards.length)), 0, movedCard);
-
-			if (sourceListId === targetListId) {
-				sourceList.cards = sourceList.cards.map((card, index) => ({ ...card, position: index }));
-			} else {
-				sourceList.cards = sourceList.cards.map((card, index) => ({ ...card, position: index }));
-				targetList.cards = targetList.cards.map((card, index) => ({ ...card, position: index }));
-			}
-
-			return nextLists;
-		});
-	};
+function BoardDndContent({ boardId }: { boardId: string }) {
+	const lists = useBoardStore((state) => state.lists);
+	const dragState = useBoardStore((state) => state.dragState);
+	const dragOverListId = useBoardStore((state) => state.dragOverListId);
+	const setDragState = useBoardStore((state) => state.setDragState);
+	const setDragOverListId = useBoardStore((state) => state.setDragOverListId);
+	const moveCardLocally = useBoardStore((state) => state.moveCardLocally);
 
 	const handleDrop = (targetListId: string, targetIndex: number) => {
 		if (!dragState) return;
