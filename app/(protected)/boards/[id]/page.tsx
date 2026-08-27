@@ -94,7 +94,18 @@ function BoardColumn({ list, cards: listCards, color }: { list: typeof cardLists
 				<div className="list-title"><span className={`status-dot ${color}`} /><h2>{list.name}</h2><span className="card-count">{listCards.length}</span></div>
 				<ListMenu listId={list.id} listName={list.name} />
 			</div>
-			{listCards.length > 0 ? <div className="card-stack">{listCards.map(({ cards: card }) => <article className="task-card" key={card.id}><div className="card-topline"><h3>{card.title}</h3><CardMenu cardId={card.id} cardTitle={card.title} /></div>{card.description && <p>{card.description}</p>}</article>)}</div> : <div className="empty-list"><p>No cards yet</p></div>}
+			{listCards.length > 0 ? 
+				<div className="card-stack">{listCards.map(({ cards: card }) => 
+					<article className="task-card" key={card.id}>
+						<div className="card-topline">
+							<h3>{card.title}</h3>
+							<CardMenu cardId={card.id} cardTitle={card.title} />
+						</div>
+						{card.description && <p>{card.description}</p>}
+					</article>)}
+				</div> 
+				: <div className="empty-list"><p>No cards yet</p></div>
+				}
 			<form action={createCard} className="add-card-form">
 				<input type="hidden" name="listId" value={list.id} />
 				<input name="title" placeholder="Card title" aria-label={`New card in ${list.name}`} required maxLength={160} />
