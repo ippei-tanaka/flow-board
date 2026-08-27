@@ -1,94 +1,61 @@
-export default function Page() {
-  return (
-    <main className="workspace-shell">
+import { and, desc, eq, gt, not } from 'drizzle-orm';
+import Link from 'next/link';
+import { auth } from '@/lib/auth/server';
+import { db } from '@/lib/db';
+import { boardInvitations, boardMembers, boards } from '@/src/db/schema';
+import CreateBoardForm from './boards/create-board-form';
 
-      <section className="board-header">
-        <div>
-          <p className="eyebrow">Personal workspace / Product team</p>
-          <div className="title-row">
-            <h1>Product launch</h1>
-            <span className="private-label"><span aria-hidden="true">●</span> Private</span>
-          </div>
-          <p className="board-description">A clear view of what is moving, what is next, and what needs your attention.</p>
-        </div>
-        <div className="board-actions">
-          <button className="secondary-button" type="button"><span aria-hidden="true">☆</span> Star board</button>
-          <button className="primary-button" type="button"><span aria-hidden="true">＋</span> Add member</button>
-        </div>
-      </section>
+export const dynamic = 'force-dynamic';
 
-      <section className="board-toolbar" aria-label="Board tools">
-        <div className="toolbar-left">
-          <button className="toolbar-button toolbar-button-active" type="button"><span aria-hidden="true">▦</span> Board</button>
-          <button className="toolbar-button" type="button"><span aria-hidden="true">☷</span> Table</button>
-          <span className="toolbar-divider" />
-          <button className="toolbar-button" type="button"><span aria-hidden="true">⚙</span> Views</button>
-        </div>
-        <div className="toolbar-right">
-          <button className="toolbar-button" type="button"><span aria-hidden="true">⌕</span> Filter</button>
-          <button className="toolbar-button" type="button"><span aria-hidden="true">↗</span> Share</button>
-        </div>
-      </section>
+export default async function BoardsPage() {
+	const { data: session } = await auth.getSession();
+	const user = session!.user;
 
-      <section className="board" aria-label="Product launch board">
-        <BoardColumn title="Ideas" count="3" color="coral" cards={[
-          { title: 'Onboarding checklist', tag: 'Research', tagColor: 'sand', text: 'Map the first five minutes for a new teammate.', avatar: 'ML' },
-          { title: 'Customer story series', tag: 'Content', tagColor: 'blue', text: 'Collect three short stories from early adopters.', avatar: 'AK' },
-          { title: 'Referral rewards', tag: 'Explore', tagColor: 'lavender', text: 'Sketch a lightweight loop for inviting collaborators.', avatar: 'SR' },
-        ]} />
-        <BoardColumn title="In progress" count="2" color="gold" cards={[
-          { title: 'Refresh landing page', tag: 'Design', tagColor: 'pink', text: 'Tighten the message and make the primary action obvious.', avatar: 'AK', progress: '3 / 5' },
-          { title: 'Invite flow v2', tag: 'Product', tagColor: 'mint', text: 'Reduce friction when adding the first project member.', avatar: 'JD', progress: '2 / 4' },
-        ]} />
-        <BoardColumn title="Review" count="2" color="blue" cards={[
-          { title: 'Usage dashboard', tag: 'Analytics', tagColor: 'blue', text: 'Review the weekly signal cards with the team.', avatar: 'SR' },
-          { title: 'Empty states', tag: 'Design', tagColor: 'pink', text: 'Give every quiet screen a useful next step.', avatar: 'ML' },
-        ]} />
-        <BoardColumn title="Done" count="3" color="green" cards={[
-          { title: 'Set up workspace', tag: 'Launch', tagColor: 'mint', text: 'Create the shared space and define the first rhythm.', avatar: 'AK' },
-          { title: 'Project principles', tag: 'Strategy', tagColor: 'sand', text: 'Write down the decisions that keep the work focused.', avatar: 'JD' },
-          { title: 'First team retro', tag: 'Team', tagColor: 'lavender', text: 'Capture what to keep, change, and try next.', avatar: 'SR' },
-        ]} />
-        <button className="add-list-button" type="button"><span aria-hidden="true">＋</span> Add another list</button>
-      </section>
-    </main>
-  );
+	const now = new Date();
+	const [ownedBoards, joinedBoards, invitedBoards] = await Promise.all([
+		db.select().from(boards).where(eq(boards.ownerId, user.id)).orderBy(desc(boards.updatedAt)),
+		db.select({ id: boards.id, name: boards.name, updatedAt: boards.updatedAt })
+			.from(boardMembers)
+			.innerJoin(boards, eq(boardMembers.boardId, boards.id))
+			.where(and(eq(boardMembers.userId, user.id), not(eq(boards.ownerId, user.id))))
+			.orderBy(desc(boards.updatedAt)),
+		db.select({ id: boards.id, name: boards.name, invitedAt: boardInvitations.createdAt })
+			.from(boardInvitations)
+			.innerJoin(boards, eq(boardInvitations.boardId, boards.id))
+			.where(and(
+				eq(boardInvitations.email, user.email),
+				eq(boardInvitations.status, 'pending'),
+				gt(boardInvitations.expiresAt, now),
+			))
+			.orderBy(desc(boardInvitations.createdAt)),
+	]);
+
+	return (
+		<main className="boards-shell">
+			<section className="boards-intro">
+				<div><p className="eyebrow">Your workspace</p><h1>Boards</h1><p className="boards-description">Keep every project close, whether you are leading it, helping out, or waiting to join.</p></div>
+				<CreateBoardForm />
+			</section>
+			<section className="boards-content" aria-label="Your boards">
+				<BoardGroup title="Created by you" count={ownedBoards.length} boards={ownedBoards} empty="Boards you create will live here." />
+				<BoardGroup title="Joined boards" count={joinedBoards.length} boards={joinedBoards} empty="Boards you join will show up here." />
+				<BoardGroup title="Invitations" count={invitedBoards.length} boards={invitedBoards} empty="New invitations will appear here." invited />
+			</section>
+		</main>
+	);
 }
 
-type Card = {
-  title: string;
-  tag: string;
-  tagColor: string;
-  text: string;
-  avatar: string;
-  progress?: string;
-};
+type BoardCard = { id: string; name: string; updatedAt?: Date | null; invitedAt?: Date | null };
 
-function BoardColumn({ title, count, color, cards }: { title: string; count: string; color: string; cards: Card[] }) {
-  return (
-    <section className="list-column">
-      <div className="list-heading">
-        <div className="list-title"><span className={`status-dot ${color}`} /> <h2>{title}</h2><span className="card-count">{count}</span></div>
-        <button className="more-button" type="button" aria-label={`More options for ${title}`} title={`More options for ${title}`}>•••</button>
-      </div>
-      <div className="card-stack">
-        {cards.map((card) => <BoardCard key={card.title} card={card} />)}
-      </div>
-      <button className="add-card-button" type="button"><span aria-hidden="true">＋</span> Add a card</button>
-    </section>
-  );
+function BoardGroup({ title, count, boards: boardList, empty, invited = false }: { title: string; count: number; boards: BoardCard[]; empty: string; invited?: boolean }) {
+	return <section className="board-group"><div className="group-heading"><div><p className="eyebrow">{invited ? 'Waiting for you' : 'Workspace'}</p><h2>{title}<span>{count}</span></h2></div>{count > 0 && <span className="group-rule" />}</div>{boardList.length > 0 ? <div className="board-grid">{boardList.map((board) => <BoardCard key={board.id} board={board} invited={invited} />)}</div> : <div className="empty-group"><span className="empty-mark" aria-hidden="true">＋</span><p>{empty}</p></div>}</section>;
 }
 
-function BoardCard({ card }: { card: Card }) {
-  return (
-    <article className="task-card">
-      <div className="card-topline"><span className={`tag ${card.tagColor}`}>{card.tag}</span><button className="card-menu" type="button" aria-label={`More options for ${card.title}`} title={`More options for ${card.title}`}>•••</button></div>
-      <h3>{card.title}</h3>
-      <p>{card.text}</p>
-      <div className="card-footer">
-        {card.progress && <span className="progress"><span aria-hidden="true">☷</span> {card.progress}</span>}
-        <span className="card-avatar">{card.avatar}</span>
-      </div>
-    </article>
-  );
+function BoardCard({ board, invited }: { board: BoardCard; invited: boolean }) {
+	const content = <><div className="board-card-icon" aria-hidden="true">▦</div><div className="board-card-copy"><h3>{board.name}</h3><p>{invited ? 'Invitation pending' : board.updatedAt ? `Updated ${formatDate(board.updatedAt)}` : 'Ready to get moving'}</p></div><span className="board-card-arrow" aria-hidden="true">↗</span></>;
+	return invited ? <article className="board-card">{content}</article> : <Link className="board-card" href={`/boards/${board.id}`}>{content}</Link>;
+}
+
+function formatDate(date: Date) {
+	return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(date);
 }

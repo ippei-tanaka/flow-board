@@ -2,6 +2,7 @@
 
 :root {
   --background: #f7f8f4;
+  --background: #ef8a2b;
   --foreground: #1d2924;
   --ink-muted: #718078;
   --line: #d9e3dc;
@@ -13,12 +14,14 @@
   --leaf: #83b98d;
 }
 
+/*
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
+*/
 
 body {
   background: var(--background);
@@ -38,6 +41,7 @@ summary:focus-visible {
   outline-offset: 3px;
 }
 
+/*
 .workspace-shell {
   min-height: 100vh;
   background:
@@ -47,6 +51,7 @@ summary:focus-visible {
     var(--background);
   background-size: 32px 32px, 32px 32px, auto, auto;
 }
+*/
 
 .topbar {
   position: relative;
@@ -78,6 +83,7 @@ summary:focus-visible {
   font-weight: 700;
   letter-spacing: -0.03em;
   white-space: nowrap;
+  text-decoration: none;
 }
 
 .brand-dot {
@@ -88,11 +94,13 @@ summary:focus-visible {
   box-shadow: 5px 0 #e7aa48;
 }
 
+/*
 .workspace-nav {
   display: flex;
   align-self: stretch;
   gap: 25px;
 }
+*/
 
 .nav-item,
 .toolbar-button,
@@ -562,18 +570,93 @@ h1 {
   font-size: 8px;
 }
 
+.progress {
+  color: var(--ink-muted);
+  font-size: 10px;
+}
+
+.add-card-button {
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 5px;
+  padding: 9px;
+  color: var(--ink-muted);
+  text-align: left;
+  font-size: 11px;
+}
+
+.add-card-form {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.add-card-form input,
+.add-list-form input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #d4ded6;
+  border-radius: 5px;
+  padding: 8px 9px;
+  color: var(--deep-green);
+  background: rgba(255, 255, 255, 0.72);
+  font: inherit;
+  font-size: 11px;
+  outline: none;
+}
+
+.add-card-form input:focus,
+.add-list-form input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(239, 115, 95, 0.12);
+}
+
+.add-card-form .add-card-button {
+  margin-top: 0;
+}
+
+.add-list-form {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  width: 180px;
+  min-width: 180px;
+}
+
+.add-card-button:hover {
+  color: var(--deep-green);
+  background: #e9eeea;
+}
+
+.add-list-button {
+  min-width: 160px;
+  margin-top: 1px;
+  border: 1px dashed #c4d0c7;
+  border-radius: 7px;
+  padding: 12px;
+  color: var(--ink-muted);
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.add-list-button:hover {
+  border-color: #90a397;
+  color: var(--deep-green);
+  background: #fff;
+}
+
 .boards-shell {
   min-height: 100vh;
   background:
-    linear-gradient(rgba(255, 255, 255, 0.38) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.38) 1px, transparent 1px),
-    radial-gradient(circle at 88% 9%, #fff8e8 0, transparent 24rem),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.1) 100px, transparent 100px),
+    /* linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px), */
+    /* radial-gradient(circle at 88% 9%, #fff8e8 0, transparent 24rem), */
     var(--background);
-  background-size: 32px 32px, 32px 32px, auto, auto;
+  background-size: 141px 141px;
 }
 
-.boards-shell .topbar { background: rgba(255, 255, 255, 0.82); }
-.boards-shell .brand-mark { text-decoration: none; }
+/* .boards-shell .topbar { background: rgba(255, 255, 255, 0.82); } */
 .nav-item-disabled { cursor: default; }
 
 .boards-intro {
@@ -787,82 +870,6 @@ h1 {
   border-radius: 50%;
   color: #809287;
   font-size: 16px;
-}
-
-.progress {
-  color: var(--ink-muted);
-  font-size: 10px;
-}
-
-.add-card-button {
-  width: 100%;
-  margin-top: 10px;
-  border-radius: 5px;
-  padding: 9px;
-  color: var(--ink-muted);
-  text-align: left;
-  font-size: 11px;
-}
-
-.add-card-form {
-  display: grid;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.add-card-form input,
-.add-list-form input {
-  width: 100%;
-  min-width: 0;
-  border: 1px solid #d4ded6;
-  border-radius: 5px;
-  padding: 8px 9px;
-  color: var(--deep-green);
-  background: rgba(255, 255, 255, 0.72);
-  font: inherit;
-  font-size: 11px;
-  outline: none;
-}
-
-.add-card-form input:focus,
-.add-list-form input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(239, 115, 95, 0.12);
-}
-
-.add-card-form .add-card-button {
-  margin-top: 0;
-}
-
-.add-list-form {
-  display: grid;
-  align-content: start;
-  gap: 7px;
-  width: 180px;
-  min-width: 180px;
-}
-
-.add-card-button:hover {
-  color: var(--deep-green);
-  background: #e9eeea;
-}
-
-.add-list-button {
-  min-width: 160px;
-  margin-top: 1px;
-  border: 1px dashed #c4d0c7;
-  border-radius: 7px;
-  padding: 12px;
-  color: var(--ink-muted);
-  text-align: left;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.add-list-button:hover {
-  border-color: #90a397;
-  color: var(--deep-green);
-  background: #fff;
 }
 
 @media (max-width: 700px) {
