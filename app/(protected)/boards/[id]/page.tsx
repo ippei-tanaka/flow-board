@@ -51,17 +51,17 @@ export default async function BoardPage({ params }: { params: Promise<{ id: stri
 					<p className="eyebrow">Workspace / Board</p>
 					<div className="title-row">
 						<h1>{board.name}</h1>
-						<span className="private-label"><span aria-hidden="true">●</span> Private</span>
+						{/* <span className="private-label"><span aria-hidden="true">●</span> Private</span> */}
 					</div>
-					<p className="board-description">A clear place to gather ideas, move work forward, and keep the team aligned.</p>
+					{/* <p className="board-description">A clear place to gather ideas, move work forward, and keep the team aligned.</p> */}
 				</div>
 				<div className="board-actions">
-					<button className="secondary-button" type="button"><span aria-hidden="true">☆</span> Star board</button>
-					<button className="primary-button" type="button"><span aria-hidden="true">＋</span> Add member</button>
+					{/* <button className="secondary-button" type="button"><span aria-hidden="true">☆</span> Star board</button> */}
+					{/* <button className="primary-button" type="button"><span aria-hidden="true">＋</span> Add member</button> */}
 				</div>
 			</section>
 
-			<section className="board-toolbar" aria-label="Board tools">
+			{/* <section className="board-toolbar" aria-label="Board tools">
 				<div className="toolbar-left">
 					<button className="toolbar-button toolbar-button-active" type="button"><span aria-hidden="true">▦</span> Board</button>
 					<button className="toolbar-button" type="button"><span aria-hidden="true">☷</span> Table</button>
@@ -73,7 +73,7 @@ export default async function BoardPage({ params }: { params: Promise<{ id: stri
 					<button className="toolbar-button" type="button"><span aria-hidden="true">⌕</span> Filter</button>
 					<button className="toolbar-button" type="button"><span aria-hidden="true">↗</span> Share</button>
 				</div>
-			</section>
+			</section> */}
 
 			<section className="board" aria-label={`${board.name} board`}>
 				{lists.map((list, index) => <BoardColumn key={list.id} list={list} cards={boardCards.filter(({ cards }) => cards.listId === list.id)} color={columns[index % columns.length].color} />)}

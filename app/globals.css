@@ -2,7 +2,7 @@
 
 :root {
   --background: #f7f8f4;
-  --background: #ef8a2b;
+  /* --background: #ef8a2b; */
   --foreground: #1d2924;
   --ink-muted: #718078;
   --line: #d9e3dc;
@@ -41,18 +41,6 @@ summary:focus-visible {
   outline-offset: 3px;
 }
 
-/*
-.workspace-shell {
-  min-height: 100vh;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.38) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.38) 1px, transparent 1px),
-    radial-gradient(circle at 8% 4%, #fffdf8 0, transparent 28rem),
-    var(--background);
-  background-size: 32px 32px, 32px 32px, auto, auto;
-}
-*/
-
 .topbar {
   position: relative;
   display: flex;
@@ -75,6 +63,27 @@ summary:focus-visible {
   content: '';
 }
 
+@media (max-width: 700px) {
+  .topbar {
+    height: auto;
+    min-height: 68px;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px 5vw;
+  }
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-left: auto;
+}
+
+@media (max-width: 700px) {
+  .topbar-actions { gap: 12px; }
+}
+
 .brand-mark {
   display: flex;
   align-items: center;
@@ -93,14 +102,6 @@ summary:focus-visible {
   background: var(--accent);
   box-shadow: 5px 0 #e7aa48;
 }
-
-/*
-.workspace-nav {
-  display: flex;
-  align-self: stretch;
-  gap: 25px;
-}
-*/
 
 .nav-item,
 .toolbar-button,
@@ -140,12 +141,6 @@ summary:focus-visible {
   content: '';
 }
 
-.topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-left: auto;
-}
 
 .icon-button {
   color: var(--ink-muted);
@@ -656,7 +651,6 @@ h1 {
   background-size: 141px 141px;
 }
 
-/* .boards-shell .topbar { background: rgba(255, 255, 255, 0.82); } */
 .nav-item-disabled { cursor: default; }
 
 .boards-intro {
@@ -873,13 +867,6 @@ h1 {
 }
 
 @media (max-width: 700px) {
-  .topbar {
-    height: auto;
-    min-height: 68px;
-    flex-wrap: wrap;
-    gap: 16px;
-    padding: 16px 5vw;
-  }
 
   .workspace-nav {
     order: 3;
@@ -888,13 +875,13 @@ h1 {
     gap: 24px;
   }
 
-  .topbar-actions { gap: 12px; }
-
+  /*
   .board-header {
     align-items: flex-start;
     flex-direction: column;
     padding-top: 38px;
   }
+    */
 
   .board-actions {
     width: 100%;

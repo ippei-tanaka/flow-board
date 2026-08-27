@@ -29,9 +29,9 @@ export default async function ProtectedLayout({ children }: { children: React.Re
 					<span className="brand-dot" />
 					<span>Flow Board</span>
 				</Link>
-				<WorkspaceNavigation />
+				{/* <WorkspaceNavigation /> */}
 				<div className="topbar-actions">
-					<button className="icon-button" type="button" aria-label="Search boards" title="Search boards">⌕</button>
+					{/* <button className="icon-button" type="button" aria-label="Search boards" title="Search boards">⌕</button> */}
 					<span className="avatar" aria-label="Your profile">{initials}</span>
 					<form action={logout}>
 						<button className="logout-button" type="submit">

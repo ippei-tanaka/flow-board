@@ -32,14 +32,14 @@ export default async function BoardsPage() {
 
 	return (
 		<main className="boards-shell">
-			<section className="boards-intro">
-				<div><p className="eyebrow">Your workspace</p><h1>Boards</h1><p className="boards-description">Keep every project close, whether you are leading it, helping out, or waiting to join.</p></div>
-				<CreateBoardForm />
-			</section>
 			<section className="boards-content" aria-label="Your boards">
-				<BoardGroup title="Created by you" count={ownedBoards.length} boards={ownedBoards} empty="Boards you create will live here." />
-				<BoardGroup title="Joined boards" count={joinedBoards.length} boards={joinedBoards} empty="Boards you join will show up here." />
-				<BoardGroup title="Invitations" count={invitedBoards.length} boards={invitedBoards} empty="New invitations will appear here." invited />
+				<BoardGroup title={`Your Board${ownedBoards.length > 1 ? 's' : ''}`} count={ownedBoards.length} boards={ownedBoards} empty="Boards you create will live here." />
+				{/* <BoardGroup title="Joined boards" count={joinedBoards.length} boards={joinedBoards} empty="Boards you join will show up here." /> */}
+				{/* <BoardGroup title="Invitations" count={invitedBoards.length} boards={invitedBoards} empty="New invitations will appear here." invited /> */}
+			</section>
+			<section className="boards-intro">
+				{/* <div><p className="eyebrow">Your workspace</p><h1>Boards</h1><p className="boards-description">Keep every project close, whether you are leading it, helping out, or waiting to join.</p></div> */}
+				<CreateBoardForm />
 			</section>
 		</main>
 	);
