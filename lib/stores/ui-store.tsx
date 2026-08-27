@@ -22,7 +22,6 @@ const UiStoreContext = createContext<StoreApi<UiStore> | null>(null);
 
 export function UiProvider({ children }: { children: ReactNode }) {
 	const [store] = useState(() => createUiStore());
-
 	return <UiStoreContext.Provider value={store}>{children}</UiStoreContext.Provider>;
 }
 

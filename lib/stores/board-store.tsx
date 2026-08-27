@@ -21,7 +21,10 @@ export type ListWithCards = {
 	cards: Card[];
 };
 
-export type DragState = { cardId: string; sourceListId: string } | null;
+export type DragState = { 
+	cardId: string; 
+	sourceListId: string 
+} | null;
 
 type BoardStore = {
 	lists: ListWithCards[];

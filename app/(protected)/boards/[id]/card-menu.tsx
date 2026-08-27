@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { deleteCard } from '../actions';
+import { deleteCard } from './actions';
 import { useUiStore } from '@/lib/stores/ui-store';
 
 export function CardMenu({ cardId, cardTitle }: { cardId: string; cardTitle: string }) {

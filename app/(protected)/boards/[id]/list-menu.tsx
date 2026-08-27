@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { deleteCardList } from '../actions';
+import { deleteCardList } from './actions';
 import { useUiStore } from '@/lib/stores/ui-store';
 
 export function ListMenu({ listId, listName }: { listId: string; listName: string }) {

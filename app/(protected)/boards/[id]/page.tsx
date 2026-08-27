@@ -2,10 +2,10 @@ import { and, asc, eq } from 'drizzle-orm';
 import { auth } from '@/lib/auth/server';
 import { db } from '@/lib/db';
 import { boardMembers, boards, cardLists, cards as cardsTable } from '@/src/db/schema';
-import { createCardList } from '../actions';
+import { createCardList } from './actions';
 import { BoardDnd } from './board-dnd';
 
-export const dynamic = 'force-dynamic';
+// export const dynamic = 'force-dynamic';
 
 const columns = [
 	{ title: 'Ideas', color: 'coral' },

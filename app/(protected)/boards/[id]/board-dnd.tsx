@@ -1,7 +1,7 @@
 'use client';
 
 import { startTransition } from 'react';
-import { createCard, moveCard } from '../actions';
+import { createCard, moveCard } from './actions';
 import { BoardProvider, useBoardStore, type ListWithCards } from '@/lib/stores/board-store';
 import { CardMenu } from './card-menu';
 import { ListMenu } from './list-menu';

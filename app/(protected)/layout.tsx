@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/server';
-import WorkspaceNavigation from '@/app/components/workspace-navigation';
+// import WorkspaceNavigation from '@/app/components/workspace-navigation';
+import { UiProvider } from '@/lib/stores/ui-store';
 
 async function logout() {
 	'use server';
@@ -23,7 +24,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
 		.toUpperCase();
 
 	return (
-		<>
+		<UiProvider>
 			<header className="topbar">
 				<Link className="brand-mark" href="/">
 					<span className="brand-dot" />
@@ -42,6 +43,6 @@ export default async function ProtectedLayout({ children }: { children: React.Re
 				</div>
 			</header>
 			{children}
-		</>
+		</UiProvider>
 	);
 }
