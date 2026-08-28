@@ -5,23 +5,10 @@ import { createCard, moveCard } from './actions';
 import { BoardMenuProvider } from './board-menu-context';
 import { CardMenu } from './card-menu';
 import { ListMenu } from './list-menu';
+import { moveCardLocally as moveCardInLists, type BoardCard, type BoardList } from '@/lib/board/move-card';
 
-export type Card = {
-	id: string;
-	title: string;
-	description: string | null;
-	listId: string;
-	position: number;
-};
-
-export type ListWithCards = {
-	id: string;
-	name: string;
-	boardId: string;
-	position: number;
-	color: string;
-	cards: Card[];
-};
+export type Card = BoardCard;
+export type ListWithCards = BoardList;
 
 type DragState = { cardId: string; sourceListId: string; } | null;
 type DragOverTarget = { listId: string; index: number } | null;
@@ -36,34 +23,7 @@ function BoardDndState({ boardId, initialLists }: { boardId: string; initialList
 	const [dragOverTarget, setDragOverTarget] = useState<DragOverTarget>(null);
 
 	const moveCardLocally = (sourceListId: string, cardId: string, targetListId: string, targetIndex: number) => {
-		setLists((currentLists) => {
-			const nextLists = currentLists.map((list) => ({
-				...list,
-				cards: list.cards.map((card) => ({ ...card })),
-			}));
-
-			const sourceList = nextLists.find((list) => list.id === sourceListId);
-			const targetList = nextLists.find((list) => list.id === targetListId);
-			if (!sourceList || !targetList) return currentLists;
-
-			const sourceIndex = sourceList.cards.findIndex((card) => card.id === cardId);
-			if (sourceIndex === -1) return currentLists;
-
-			const [movedCard] = sourceList.cards.splice(sourceIndex, 1);
-			if (!movedCard) return currentLists;
-
-			const normalizedTargetIndex = sourceListId === targetListId && sourceIndex < targetIndex
-				? targetIndex - 1
-				: targetIndex;
-			movedCard.listId = targetListId;
-			targetList.cards.splice(Math.max(0, Math.min(normalizedTargetIndex, targetList.cards.length)), 0, movedCard);
-
-			for (const list of sourceListId === targetListId ? [sourceList] : [sourceList, targetList]) {
-				list.cards = list.cards.map((card, index) => ({ ...card, position: index }));
-			}
-
-			return nextLists;
-		});
+		setLists((currentLists) => moveCardInLists(currentLists, sourceListId, cardId, targetListId, targetIndex));
 	};
 
 	return <BoardMenuProvider><BoardDndContent
@@ -99,13 +59,6 @@ function BoardDndContent({
 		if (!dragState) return;
 
 		const { cardId, sourceListId } = dragState;
-		const sameList = sourceListId === targetListId;
-		const resolvedTargetIndex = sameList && sourceListId
-			? Math.max(0, targetIndex)
-			: Math.max(0, targetIndex);
-
-		console.log(targetIndex);
-
 		moveCardLocally(sourceListId, cardId, targetListId, targetIndex);
 		setDragOverTarget(null);
 
@@ -115,7 +68,7 @@ function BoardDndContent({
 			formData.set('cardId', cardId);
 			formData.set('sourceListId', sourceListId);
 			formData.set('targetListId', targetListId);
-			formData.set('targetIndex', String(targetIndex));
+			formData.set('targetIndex', String(Math.max(0, targetIndex)));
 			void moveCard(formData);
 		});
 
