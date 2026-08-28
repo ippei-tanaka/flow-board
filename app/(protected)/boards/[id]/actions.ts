@@ -2,7 +2,7 @@
 
 import { auth } from '@/lib/auth/server';
 import { db } from '@/lib/db';
-import { boardMembers, boards, cardLists, cards } from '@/src/db/schema';
+import { boardMembers, cardLists, cards } from '@/src/db/schema';
 import { and, eq, max, asc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
