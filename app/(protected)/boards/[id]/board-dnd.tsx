@@ -156,7 +156,7 @@ function BoardDndContent({
 					}}
 					onDrop={(event) => {
 						event.preventDefault();
-						handleDrop(list.id, dragOverTarget?.index ? dragOverTarget?.index - 1 : 0);
+						handleDrop(list.id, dragOverTarget?.index ?? 0);
 					}}
 				>
 					<div className="list-heading">

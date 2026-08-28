@@ -123,13 +123,17 @@ export async function moveCard(formData: FormData) {
 		.orderBy(asc(cards.position));
 
 	const sourceWithoutDragged = sourceCards.filter((card) => card.id !== cardId);
+	const sourceIndex = sourceCards.findIndex((card) => card.id === cardId);
 
 	let nextSource = sourceWithoutDragged;
 	let nextTarget: typeof cards.$inferSelect[] = [];
 
 	if (sourceListId === targetListId) {
 		nextSource = [...sourceWithoutDragged];
-		nextSource.splice(Math.max(0, Math.min(targetIndex, nextSource.length)), 0, { ...cardRecord, listId: sourceListId } as typeof cards.$inferSelect);
+		// Apply normalization for same-list moves: when source index < target index,
+		// subtract 1 to account for the card being removed from the source list
+		const normalizedTargetIndex = sourceIndex < targetIndex ? targetIndex - 1 : targetIndex;
+		nextSource.splice(Math.max(0, Math.min(normalizedTargetIndex, nextSource.length)), 0, { ...cardRecord, listId: sourceListId } as typeof cards.$inferSelect);
 	} else {
 		nextTarget = await db.select()
 			.from(cards)
