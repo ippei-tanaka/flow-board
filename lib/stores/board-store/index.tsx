@@ -4,15 +4,29 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 import { createStore, type StoreApi } from 'zustand/vanilla';
 import { useStore } from 'zustand';
 
-export type Card = {
-	id: string;
-	title: string;
-	description: string | null;
-	listId: string;
-	position: number;
+export type DragState = { 
+	cardId: string; 
+	sourceListId: string 
+} | null;
+
+export type DragOverTarget = { listId: string; index: number } | null;
+
+export type BoardStore = {
+	lists: CardList[];
+	dragState: DragState;
+	dragOverTarget: DragOverTarget;
+	setDragState: (dragState: DragState) => void;
+	setDragOverTarget: (target: DragOverTarget) => void;
+	moveCardLocally: (sourceListId: string, cardId: string, targetListId: string, targetIndex: number) => void;
 };
 
-export type ListWithCards = {
+export type Board = {
+	name: string;
+	ownerId: string;
+	cardLists: CardList[];
+};
+
+export type CardList = {
 	id: string;
 	name: string;
 	boardId: string;
@@ -21,23 +35,15 @@ export type ListWithCards = {
 	cards: Card[];
 };
 
-export type DragState = { 
-	cardId: string; 
-	sourceListId: string 
-} | null;
-
-export type DragOverTarget = { listId: string; index: number } | null;
-
-type BoardStore = {
-	lists: ListWithCards[];
-	dragState: DragState;
-	dragOverTarget: DragOverTarget;
-	setDragState: (dragState: DragState) => void;
-	setDragOverTarget: (target: DragOverTarget) => void;
-	moveCardLocally: (sourceListId: string, cardId: string, targetListId: string, targetIndex: number) => void;
+export type Card = {
+	id: string;
+	title: string;
+	description: string | null;
+	listId: string;
+	position: number;
 };
 
-export function createBoardStore(initialLists: ListWithCards[]) {
+export function createBoardStore(initialLists: CardList[]) {
 	return createStore<BoardStore>((set) => ({
 		lists: initialLists,
 		dragState: null,
@@ -72,14 +78,16 @@ export function createBoardStore(initialLists: ListWithCards[]) {
 
 			return { lists: nextLists };
 		}),
+		createBoard: ({name}:{name:string}) => {
+
+		}
 	}));
 }
 
 const BoardStoreContext = createContext<StoreApi<BoardStore> | null>(null);
 
-export function BoardProvider({ initialLists, children }: { initialLists: ListWithCards[]; children: ReactNode }) {
+export function BoardProvider({ initialLists, children }: { initialLists: CardList[]; children: ReactNode }) {
 	const [store] = useState(() => createBoardStore(initialLists));
-
 	return <BoardStoreContext.Provider value={store}>{children}</BoardStoreContext.Provider>;
 }
 

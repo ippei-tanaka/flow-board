@@ -1,49 +1,24 @@
 'use client';
 
-import { createContext, useContext, useState, type ReactNode } from 'react';
-import { createStore, type StoreApi } from 'zustand/vanilla';
-import { useStore } from 'zustand';
+import { createStore } from 'zustand/vanilla';
+import type { DragState, CardList } from './index';
 
-export type Card = {
-	id: string;
-	title: string;
-	description: string | null;
-	listId: string;
-	position: number;
-};
-
-export type ListWithCards = {
-	id: string;
-	name: string;
-	boardId: string;
-	position: number;
-	color: string;
-	cards: Card[];
-};
-
-export type DragState = { 
-	cardId: string; 
-	sourceListId: string 
-} | null;
-
-export type DragOverTarget = { listId: string; index: number } | null;
-
-type BoardStore = {
-	lists: ListWithCards[];
+export type BoardStore = {
+	lists: CardList[];
 	dragState: DragState;
-	dragOverTarget: DragOverTarget;
+	dragOverListId: string | null;
 	setDragState: (dragState: DragState) => void;
-	setDragOverTarget: (target: DragOverTarget) => void;
+	setDragOverListId: (listId: string | null) => void;
 	moveCardLocally: (sourceListId: string, cardId: string, targetListId: string, targetIndex: number) => void;
 };
 
-export function createBoardStore(initialLists: ListWithCards[]) {
+export function createBoardStore(initialLists: CardList[]) {
 	return createStore<BoardStore>((set) => ({
 		lists: initialLists,
 		dragState: null,
-		dragOverTarget: null,
+		dragOverListId: null,
 		setDragState: (dragState) => set({ dragState }),
-		setDragOverTarget: (dragOverTarget) => set({ dragOverTarget }),
+		setDragOverListId: (dragOverListId) => set({ dragOverListId }),
 		moveCardLocally: (sourceListId, cardId, targetListId, targetIndex) => set((state) => {
 			const nextLists = state.lists.map((list) => ({
 				...list,
@@ -73,18 +48,4 @@ export function createBoardStore(initialLists: ListWithCards[]) {
 			return { lists: nextLists };
 		}),
 	}));
-}
-
-const BoardStoreContext = createContext<StoreApi<BoardStore> | null>(null);
-
-export function BoardProvider({ initialLists, children }: { initialLists: ListWithCards[]; children: ReactNode }) {
-	const [store] = useState(() => createBoardStore(initialLists));
-
-	return <BoardStoreContext.Provider value={store}>{children}</BoardStoreContext.Provider>;
-}
-
-export function useBoardStore<T>(selector: (state: BoardStore) => T) {
-	const store = useContext(BoardStoreContext);
-	if (!store) throw new Error('useBoardStore must be used within a BoardProvider');
-	return useStore(store, selector);
 }

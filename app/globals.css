@@ -437,6 +437,13 @@ h1 {
   gap: 10px;
 }
 
+.card-drop-preview {
+  min-height: 72px;
+  border: 1px dashed #79a889;
+  border-radius: 8px;
+  background: rgba(117, 170, 131, 0.14);
+}
+
 .empty-list {
   display: grid;
   min-height: 74px;

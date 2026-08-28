@@ -1,6 +1,6 @@
 'use client';
 
-import { startTransition } from 'react';
+import { Fragment, startTransition } from 'react';
 import { createCard, moveCard } from './actions';
 import { BoardProvider, useBoardStore, type ListWithCards } from '@/lib/stores/board-store';
 import { CardMenu } from './card-menu';
@@ -13,9 +13,9 @@ export function BoardDnd({ boardId, initialLists }: { boardId: string; initialLi
 function BoardDndContent({ boardId }: { boardId: string }) {
 	const lists = useBoardStore((state) => state.lists);
 	const dragState = useBoardStore((state) => state.dragState);
-	const dragOverListId = useBoardStore((state) => state.dragOverListId);
+	const dragOverTarget = useBoardStore((state) => state.dragOverTarget);
 	const setDragState = useBoardStore((state) => state.setDragState);
-	const setDragOverListId = useBoardStore((state) => state.setDragOverListId);
+	const setDragOverTarget = useBoardStore((state) => state.setDragOverTarget);
 	const moveCardLocally = useBoardStore((state) => state.moveCardLocally);
 
 	const handleDrop = (targetListId: string, targetIndex: number) => {
@@ -28,7 +28,7 @@ function BoardDndContent({ boardId }: { boardId: string }) {
 			: Math.max(0, targetIndex);
 
 		moveCardLocally(sourceListId, cardId, targetListId, resolvedTargetIndex);
-		setDragOverListId(null);
+		setDragOverTarget(null);
 
 		startTransition(() => {
 			const formData = new FormData();
@@ -43,24 +43,36 @@ function BoardDndContent({ boardId }: { boardId: string }) {
 		setDragState(null);
 	};
 
+	const getTargetIndex = (event: React.DragEvent<HTMLElement>, index: number) => {
+		if (!dragState) return index;
+		const targetIndex = index + (event.clientY > event.currentTarget.getBoundingClientRect().top + event.currentTarget.getBoundingClientRect().height / 2 ? 1 : 0);
+		if (dragState.sourceListId === event.currentTarget.closest('.list-column')?.getAttribute('data-list-id')) {
+			const sourceIndex = lists.find((list) => list.id === dragState.sourceListId)?.cards.findIndex((card) => card.id === dragState.cardId) ?? -1;
+			return sourceIndex >= 0 && sourceIndex < targetIndex ? targetIndex - 1 : targetIndex;
+		}
+		return targetIndex;
+	};
+
 	return (
 		<>
 			{lists.map((list) => (
 				<section
 					key={list.id}
-					className={`list-column${dragOverListId === list.id ? ' is-over' : ''}`}
+					data-list-id={list.id}
+					className={`list-column${dragOverTarget?.listId === list.id ? ' is-over' : ''}`}
 					onDragOver={(event) => {
 						event.preventDefault();
-						setDragOverListId(list.id);
+						if ((event.target as HTMLElement).closest('.task-card')) return;
+						setDragOverTarget({ listId: list.id, index: list.cards.length });
 					}}
 					onDragLeave={() => {
-						if (dragOverListId === list.id) {
-							setDragOverListId(null);
+						if (dragOverTarget?.listId === list.id) {
+							setDragOverTarget(null);
 						}
 					}}
 					onDrop={(event) => {
 						event.preventDefault();
-						handleDrop(list.id, list.cards.length);
+						handleDrop(list.id, dragOverTarget?.listId === list.id ? dragOverTarget.index : list.cards.length);
 					}}
 				>
 					<div className="list-heading">
@@ -75,22 +87,23 @@ function BoardDndContent({ boardId }: { boardId: string }) {
 					{list.cards.length > 0 ? (
 						<div className="card-stack">
 							{list.cards.map((card, index) => (
+								<Fragment key={card.id}>
+								{dragOverTarget?.listId === list.id && dragOverTarget.index === index && <div className="card-drop-preview" aria-hidden="true" />}
 								<article
-									key={card.id}
 									className={`task-card${dragState?.cardId === card.id ? ' is-dragging' : ''}`}
 									draggable
 									onDragStart={() => setDragState({ cardId: card.id, sourceListId: list.id })}
 									onDragEnd={() => {
 										setDragState(null);
-										setDragOverListId(null);
+										setDragOverTarget(null);
 									}}
 									onDragOver={(event) => {
 										event.preventDefault();
-										setDragOverListId(list.id);
+										setDragOverTarget({ listId: list.id, index: getTargetIndex(event, index) });
 									}}
 									onDrop={(event) => {
 										event.preventDefault();
-										handleDrop(list.id, index);
+										handleDrop(list.id, getTargetIndex(event, index));
 									}}
 								>
 									<div className="card-topline">
@@ -99,10 +112,16 @@ function BoardDndContent({ boardId }: { boardId: string }) {
 									</div>
 									{card.description && <p>{card.description}</p>}
 								</article>
+								</Fragment>
 							))}
+							{dragOverTarget?.listId === list.id && dragOverTarget.index >= list.cards.length && <div className="card-drop-preview" aria-hidden="true" />}
 						</div>
 					) : (
-						<div className="empty-list"><p>No cards yet</p></div>
+						<div className="empty-list">
+							{dragOverTarget?.listId === list.id && dragOverTarget.index === 0
+								? <div className="card-drop-preview" aria-hidden="true" />
+								: <p>No cards yet</p>}
+						</div>
 					)}
 					<form action={createCard} className="add-card-form">
 						<input type="hidden" name="listId" value={list.id} />
