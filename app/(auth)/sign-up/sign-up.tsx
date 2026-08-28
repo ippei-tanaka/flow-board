@@ -38,7 +38,7 @@ export default function SignUp() {
 
 						<p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#b36b25]">Get started</p>
 						<h2 className="text-4xl font-semibold tracking-tight text-[#1c2b25]">Create your account</h2>
-						<p className="mt-4 text-[#5d6d63]">A better place for your best work.</p>
+						<p className="mt-4 text-[#dd3333]">Testing the app?<br />Use <span className='font-bold'>a random email address</span> to sign up!</p>
 
 						<form action={formAction} className="mt-10 space-y-5">
 							<div>
