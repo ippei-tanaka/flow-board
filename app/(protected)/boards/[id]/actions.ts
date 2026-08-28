@@ -2,12 +2,30 @@
 
 import { auth } from '@/lib/auth/server';
 import { db } from '@/lib/db';
-import { boardMembers, cardLists, cards } from '@/src/db/schema';
+import { boardMembers, boards, cardLists, cards } from '@/src/db/schema';
 import { and, eq, max, asc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 export type CreateBoardState = { error: string } | null;
+
+export async function deleteBoard(formData: FormData) {
+	const { data: session } = await auth.getSession();
+	if (!session?.user) redirect('/sign-in');
+
+	const boardId = String(formData.get('boardId') ?? '');
+	if (!boardId) return;
+
+	const [board] = await db.select({ id: boards.id })
+		.from(boards)
+		.where(and(eq(boards.id, boardId), eq(boards.ownerId, session.user.id)))
+		.limit(1);
+	if (!board) return;
+
+	await db.delete(boards).where(eq(boards.id, boardId));
+	revalidatePath('/boards');
+	redirect('/boards');
+}
 
 export async function createCardList(formData: FormData) {
 	const { data: session } = await auth.getSession();

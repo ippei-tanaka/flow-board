@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { boardMembers, boards, cardLists, cards as cardsTable } from '@/src/db/schema';
 import { createCardList } from './actions';
 import { BoardDnd } from './board-dnd';
+import { DeleteBoardButton } from './delete-board-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,6 +52,7 @@ export default async function BoardPage({ params }: { params: Promise<{ id: stri
 						<h1>{board.name}</h1>
 					</div>
 				</div>
+				<DeleteBoardButton boardId={id} />
 			</section>
 
 			<section className="board" aria-label={`${board.name} board`}>

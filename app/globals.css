@@ -225,6 +225,22 @@ h1 {
   transform: translateY(2px);
 }
 
+.delete-board-button {
+  border: 1px solid #d7a39a;
+  border-radius: 7px;
+  padding: 10px 13px;
+  color: #a4473a;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.delete-board-button:hover {
+  color: #fff;
+  background: #a4473a;
+}
+
 .board {
   display: flex;
   align-items: flex-start;
