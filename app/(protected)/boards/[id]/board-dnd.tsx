@@ -27,6 +27,10 @@ type DragState = { cardId: string; sourceListId: string } | null;
 type DragOverTarget = { listId: string; index: number } | null;
 
 export function BoardDnd({ boardId, initialLists }: { boardId: string; initialLists: ListWithCards[] }) {
+	return <BoardDndState key={JSON.stringify(initialLists)} boardId={boardId} initialLists={initialLists} />;
+}
+
+function BoardDndState({ boardId, initialLists }: { boardId: string; initialLists: ListWithCards[] }) {
 	const [lists, setLists] = useState(initialLists);
 	const [dragState, setDragState] = useState<DragState>(null);
 	const [dragOverTarget, setDragOverTarget] = useState<DragOverTarget>(null);
