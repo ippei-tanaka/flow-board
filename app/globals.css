@@ -385,6 +385,23 @@ h1 {
   letter-spacing: 1px;
 }
 
+.list-menu .more-button {
+  color: #b86b62;
+}
+
+.card-menu {
+  color: #b86b62;
+}
+
+.trash-icon {
+  display: block;
+  width: 15px;
+  height: 15px;
+  background: currentColor;
+  -webkit-mask: url('/icon-trash-can.svg') center / contain no-repeat;
+  mask: url('/icon-trash-can.svg') center / contain no-repeat;
+}
+
 .more-button:hover,
 .card-menu:hover {
   color: var(--deep-green);
