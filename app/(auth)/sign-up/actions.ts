@@ -2,6 +2,7 @@
 
 import { auth } from '@/lib/auth/server';
 import { redirect } from 'next/navigation';
+import { createFirstTimeBoard } from '@/app/(protected)/boards/actions';
 
 export type SignUpState = {
 	error: string;
@@ -27,6 +28,12 @@ export async function signUpWithEmail(
 
 	if (error) {
 		return { error: error.message || 'Unable to create your account. Please try again.' };
+	}
+
+	// Get the session to access user ID
+	const { data: session } = await auth.getSession();
+	if (session?.user) {
+		await createFirstTimeBoard(session.user.id);
 	}
 
 	redirect('/');
