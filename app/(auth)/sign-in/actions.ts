@@ -25,11 +25,5 @@ export async function signInWithEmail(
     return { error: error.message || 'Unable to sign in. Please try again.' };
   }
 
-  // Get the session to access user ID
-  const { data: session } = await auth.getSession();
-  if (session?.user) {
-    await createFirstTimeBoard(session.user.id);
-  }
-
   redirect('/');
 }

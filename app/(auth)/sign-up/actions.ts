@@ -24,16 +24,17 @@ export async function signUpWithEmail(
 		return { error: 'Your password must be at least 8 characters.' };
 	}
 
-	const { error } = await auth.signUp.email({ name, email, password });
+	const result = await auth.signUp.email({ name, email, password });
 
-	if (error) {
-		return { error: error.message || 'Unable to create your account. Please try again.' };
+
+	if (result.error) {
+		return { error: result.error.message || 'Unable to create your account. Please try again.' };
 	}
 
 	// Get the session to access user ID
-	const { data: session } = await auth.getSession();
-	if (session?.user) {
-		await createFirstTimeBoard(session.user.id);
+	// const { data: session } = await auth.getSession();
+	if (result.data?.user.id) {
+		await createFirstTimeBoard(result.data?.user.id);
 	}
 
 	redirect('/');

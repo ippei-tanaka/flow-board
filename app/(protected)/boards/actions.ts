@@ -79,6 +79,8 @@ export async function createFirstTimeBoard(userId: string) {
 	const existingBoards = await db.select().from(boards)
 		.where(eq(boards.ownerId, userId));
 
+	console.log(existingBoards);
+
 	if (existingBoards.length > 0) {
 		return; // User already has boards
 	}
