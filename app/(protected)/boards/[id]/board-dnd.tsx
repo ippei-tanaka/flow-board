@@ -1,22 +1,95 @@
 'use client';
 
-import { Fragment, startTransition } from 'react';
+import { Fragment, startTransition, useState } from 'react';
 import { createCard, moveCard } from './actions';
-import { BoardProvider, useBoardStore, type ListWithCards } from '@/lib/stores/board-store';
+import { BoardMenuProvider } from './board-menu-context';
 import { CardMenu } from './card-menu';
 import { ListMenu } from './list-menu';
 
+export type Card = {
+	id: string;
+	title: string;
+	description: string | null;
+	listId: string;
+	position: number;
+};
+
+export type ListWithCards = {
+	id: string;
+	name: string;
+	boardId: string;
+	position: number;
+	color: string;
+	cards: Card[];
+};
+
+type DragState = { cardId: string; sourceListId: string } | null;
+type DragOverTarget = { listId: string; index: number } | null;
+
 export function BoardDnd({ boardId, initialLists }: { boardId: string; initialLists: ListWithCards[] }) {
-	return <BoardProvider initialLists={initialLists}><BoardDndContent boardId={boardId} /></BoardProvider>;
+	const [lists, setLists] = useState(initialLists);
+	const [dragState, setDragState] = useState<DragState>(null);
+	const [dragOverTarget, setDragOverTarget] = useState<DragOverTarget>(null);
+
+	const moveCardLocally = (sourceListId: string, cardId: string, targetListId: string, targetIndex: number) => {
+		setLists((currentLists) => {
+			const nextLists = currentLists.map((list) => ({
+				...list,
+				cards: list.cards.map((card) => ({ ...card })),
+			}));
+
+			const sourceList = nextLists.find((list) => list.id === sourceListId);
+			const targetList = nextLists.find((list) => list.id === targetListId);
+			if (!sourceList || !targetList) return currentLists;
+
+			const sourceIndex = sourceList.cards.findIndex((card) => card.id === cardId);
+			if (sourceIndex === -1) return currentLists;
+
+			const [movedCard] = sourceList.cards.splice(sourceIndex, 1);
+			if (!movedCard) return currentLists;
+
+			const normalizedTargetIndex = sourceListId === targetListId && sourceIndex < targetIndex
+				? targetIndex - 1
+				: targetIndex;
+			movedCard.listId = targetListId;
+			targetList.cards.splice(Math.max(0, Math.min(normalizedTargetIndex, targetList.cards.length)), 0, movedCard);
+
+			for (const list of sourceListId === targetListId ? [sourceList] : [sourceList, targetList]) {
+				list.cards = list.cards.map((card, index) => ({ ...card, position: index }));
+			}
+
+			return nextLists;
+		});
+	};
+
+	return <BoardMenuProvider><BoardDndContent
+		boardId={boardId}
+		lists={lists}
+		dragState={dragState}
+		dragOverTarget={dragOverTarget}
+		setDragState={setDragState}
+		setDragOverTarget={setDragOverTarget}
+		moveCardLocally={moveCardLocally}
+	/></BoardMenuProvider>;
 }
 
-function BoardDndContent({ boardId }: { boardId: string }) {
-	const lists = useBoardStore((state) => state.lists);
-	const dragState = useBoardStore((state) => state.dragState);
-	const dragOverTarget = useBoardStore((state) => state.dragOverTarget);
-	const setDragState = useBoardStore((state) => state.setDragState);
-	const setDragOverTarget = useBoardStore((state) => state.setDragOverTarget);
-	const moveCardLocally = useBoardStore((state) => state.moveCardLocally);
+function BoardDndContent({
+	boardId,
+	lists,
+	dragState,
+	dragOverTarget,
+	setDragState,
+	setDragOverTarget,
+	moveCardLocally,
+}: {
+	boardId: string;
+	lists: ListWithCards[];
+	dragState: DragState;
+	dragOverTarget: DragOverTarget;
+	setDragState: (dragState: DragState) => void;
+	setDragOverTarget: (target: DragOverTarget) => void;
+	moveCardLocally: (sourceListId: string, cardId: string, targetListId: string, targetIndex: number) => void;
+}) {
 
 	const handleDrop = (targetListId: string, targetIndex: number) => {
 		if (!dragState) return;

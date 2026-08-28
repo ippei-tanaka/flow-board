@@ -2,14 +2,13 @@
 
 import { useEffect, useRef } from 'react';
 import { deleteCardList } from './actions';
-import { useUiStore } from '@/lib/stores/ui-store';
+import { useBoardMenu } from './board-menu-context';
 
 export function ListMenu({ listId, listName }: { listId: string; listName: string }) {
 	const menuRef = useRef<HTMLDivElement>(null);
 	const menuId = `list:${listId}`;
-	const open = useUiStore((state) => state.openMenuId === menuId);
-	const toggleMenu = useUiStore((state) => state.toggleMenu);
-	const closeMenu = useUiStore((state) => state.closeMenu);
+	const { openMenuId, toggleMenu, closeMenu } = useBoardMenu();
+	const open = openMenuId === menuId;
 
 	useEffect(() => {
 		function closeOnOutsideClick(event: PointerEvent) {
