@@ -11,9 +11,8 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
       NEON_AUTH_BASE_URL: ${{ secrets.NEON_AUTH_BASE_URL }}
-      NEON_AUTH_JWKS_URL: ${{ secrets.NEON_AUTH_COOKIE_SECRET }}
-      NEON_AUTH_COOKIE_SECRET: ${{ vars.NEON_AUTH_COOKIE_SECRET }}
-      RANDOM_THING: "OH!"
+      NEON_AUTH_JWKS_URL: ${{ secrets.NEON_AUTH_JWKS_URL }}
+      NEON_AUTH_COOKIE_SECRET: ${{ secrets.NEON_AUTH_COOKIE_SECRET }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
