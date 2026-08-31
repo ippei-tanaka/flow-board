@@ -1,5 +1,7 @@
 import { createNeonAuth } from '@neondatabase/auth/next/server';
 
+console.log(process.env);
+
 export const auth = createNeonAuth({
   baseUrl: process.env.NEON_AUTH_BASE_URL!,
   cookies: {
